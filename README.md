@@ -1,6 +1,7 @@
 # osdepth
 R functions to compute the origin-scale depth and plot the OSD-chart
 
+```{r}
 source("https://raw.githubusercontent.com/icascos/osdepth/master/OSD_chart.R")
 require(qcc)
 military=read.csv("https://raw.githubusercontent.com/icascos/osdepth/master/military.csv",
@@ -17,3 +18,4 @@ osd.chart(samples.dist.trial,type="param",newdata=samples.dist.new,
 set.seed(1)
 osd.chart(samples.dist.trial,type="boot",newdata=samples.dist.new,
           alpha=0.002,B=10000)
+```
