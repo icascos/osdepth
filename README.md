@@ -1,7 +1,9 @@
 # osdepth
-R functions to compute the origin-scale depth and plot the OSD-chart
+R functions to compute the origin-scale depth and plot the OSD-chart.
 
-```{r echo=T,eval=T,fig.width=7,fig.height=6,message=FALSE,warning=FALSE,results="hide"}
+Copy and paste the piece of code below, which uses the `qcc` package in order to plot some examples of the OSD chart.
+
+```{r}
 source("https://raw.githubusercontent.com/icascos/osdepth/master/OSD_chart.R")
 require(qcc)
 military=read.csv("https://raw.githubusercontent.com/icascos/osdepth/master/military.csv",
