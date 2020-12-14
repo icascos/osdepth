@@ -1,12 +1,16 @@
-# OSD-chart depicts a OSD-chart from data matrix samples. Each row corresponds to a sample and 
+# OSD-chart depicts an OSD-chart from data matrix samples. Each row corresponds to a sample and 
 # the number of columns is the number of observations in a sample
 # By default the semiparametric procedure with False Alarm Probability (alpha) equal to 0.0027 is used.
 # Alternatively the semiparametric procedure with alpha 0.05 can be selected or the control limit
 # is approximated by resampling, and it possible to fix any alpha and number of resamples.
+# The OSD EWMA chart is plotted by selecting type EWMA. The default lambda is 0.25
+# The OSD EWMA chart plotted is the parametric if theta and lambda are given, otherwise it is the nonparametric.
 
 source("https://raw.githubusercontent.com/icascos/osdepth/master/OSD.R")
 
-osd.chart=function(trials,type="sexp.002",alpha=0.05,B=1000,newdata=NULL,theta=NULL,lambda=NULL){
+require(spc)
+osd.chart=function(trials,type="sexp.002",alpha=0.05,B=1000,Bew=10000,delta=0.25,newdata=NULL,theta=NULL,lambda=NULL){
+  if(alpha<=0|alpha>=1) alpha=0.05
   n=ncol(trials)
   Me=c(0.29675,0.48761,0.58949,0.65388,0.69842,0.73132,0.7568,0.77704,
        0.79377,0.80784,0.81989,0.82994,0.83889,0.84656,0.85375,0.8601,
@@ -41,18 +45,51 @@ osd.chart=function(trials,type="sexp.002",alpha=0.05,B=1000,newdata=NULL,theta=N
       if(is.null(lambda.h)) lambda.h=mean(trials)-theta.h
       depth=depthsexp.sample(samples=rbind(trials,newdata),theta=theta.h,lambda=lambda.h)
       alfa=0.002
+  }
+  else if(type=="EWMA"){
+    if(delta<=0|delta>=1) delta=0.25
+    
+    if(is.null(theta)|is.null(lambda)) {
+      sdepth=osdepth(samples=matrix(sample(as.vector(trials),Bew*n,replace=TRUE),ncol=n),x=as.vector(trials))
+      depth2=osdepth(samples=rbind(trials,newdata),x=as.vector(trials))
+      }
+    else {
+      sdepth=depthsexp.sample(matrix(rexp(Bew*n),ncol=n))
+      depth2=depthsexp.sample(samples=rbind(trials,newdata),theta=theta,lambda=lambda)
+    } 
+    sdepth=c(sdepth,0)
+    
+    rdata=vector(length=length(depth2))
+    for(i in 1:length(rdata)) {rdata[i]=mean(depth2[i]>sdepth)}
+    
+    s1=-delta*log(rdata)[1]+(1-delta)
+    sk=s1
+    depth=vapply(-log(rdata)[-1],function(x) sk <<- delta*x+(1-delta)*sk,0)
+    depth=c(s1,depth)
+    
+    CL=sewma.crit(l=delta,L0=1/alpha,df=2)[2]
+    alfa=alpha
+  }
+  else depth=osdepth(samples=rbind(trials,newdata),x=as.vector(trials))
+  plot(depth,ylim=c(min(depth,CL),max(depth,CL)),type="l",xlab="sample",ylab="") 
+  if(type=="boot") title("OSD chart nonparametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="OSD")
+  else if (type=="EWMA")  title(paste("OSD EWMA chart, delta=",delta),sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="EWMA")
+  else if (type=="param")  title("OSD chart parametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="OSD")
+  else title("OSD chart semiparametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="OSD")
+  if(type!="EWMA") {
+    for(i in 1:length(depth)) {
+      if(depth[i]>=CL) {points(i,depth[i])}
+      else {points(i,depth[i],pch=8)}
     }
-    else depth=osdepth(samples=rbind(trials,newdata),x=as.vector(trials))
-  plot(depth,ylim=c(min(depth,CL),1),type="l",ylab="OSD",xlab="sample") 
-  if(type=="boot") title("OSD chart nonparametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000))
-  else if (type=="param")  title("OSD chart parametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000))
-  else title("OSD chart semiparametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000))
-  for(i in 1:length(depth)) {
-    if(depth[i]>=CL) {points(i,depth[i])}
-    else {points(i,depth[i],pch=8)}
+    abline(h=Me,lty=2)
+  }
+  else {
+    for(i in 1:length(depth)) {
+      if(depth[i]<=CL) {points(i,depth[i])}
+      else {points(i,depth[i],pch=8)}
+    }
   }
   abline(h=CL)
-  abline(h=Me,lty=2)
   if(!is.null(newdata)) abline(v=nrow(trials)+.5,lty=3)
   text(length(depth),CL+.03,c("CL"))
 }
