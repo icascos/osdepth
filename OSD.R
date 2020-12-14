@@ -1,39 +1,24 @@
 # univariate zonoid depth of s w.r.t. sample x
 
-zdepth<-function(s,x,ord=F){
-  
-  if(ord==F){x=sort(x)}
-  n=length(x)
-  
-  i=1
-  if((s<x[1])|(s>x[n])){zdepth=0;return(zdepth)}
-  if(s==x[1]){while((x[i+1]==s)&(i<n)){i=i+1};zdepth=i/n;return(zdepth)}
-  if(s==x[n]){while((x[n-i]==s)&(i<n)){i=i+1};zdepth=i/n;return(zdepth)}
-  
-  m=mean(x)
-  
-  if(s==m){zdepth=1;return(zdepth)}
-  if(n==1){zdepth=0;return(zdepth)}
-  if(s<m){
-    suma=x[1]
-    while(((suma+x[i+1])/(i+1)<s)&(i<n)){i=i+1;suma=suma+x[i]}
-    zdepth=i*(suma/i-x[i+1])/(n*(s-x[i+1]))
-    return(zdepth)
-  }
-  
-  if(s>m){
-    suma=x[n]
-    while(((suma+x[n-i])/(i+1)>s)&(i<(n-1))){i=i+1;suma=suma+x[n-i+1]}
-    zdepth=i*(suma/i-x[n-i])/(n*(s-x[n-i]))
-    return(zdepth)
-  }
-  
+zdepth <- function(x,s,prob=rep(1/length(s),length(s)),ord=FALSE) {
+  prob=prob/sum(prob)
+  if(ord==FALSE) {or<-order(s);prob<-prob[or];s<-s[or]}
+  n <- length(s)
+  if((x<s[1])|(x>s[n])) {return(0)}
+  me <- sum(s*prob)
+  if(x==sum(s*prob)) {return(1)}
+  if(x>me) {x <- -x ; s <- -s[n:1] ; prob <- prob[n:1]}
+  i <- 1
+  ac <- s[i]*prob[i]
+  ap <- prob[i]
+  while(x*ap>=ac) {i <- i+1 ; ap <- ap+prob[i] ; ac <- ac+s[i]*prob[i]}
+  return((ap*s[i]-ac)/(s[i]-x))
 }
 
 
 # cdf of shifted exponential with parameters theta and lambda evaluated on x
 
-psexp=function(x,theta=1,lambda=1){if(x<theta){return(0)};return(1-exp(-(x-theta)/lambda))}
+psexp=function(x,theta=0,lambda=1){if(x<theta){return(0)};return(1-exp(-(x-theta)/lambda))}
 
 
 # zonoid depth of t w.r.t. exponential with parameter lambda
@@ -49,14 +34,14 @@ depthexp=function(t,lambda=1){
 
 # origin-scale depth of (t1,t2) w.r.t. shifted exponential with parameters theta and lambda
 
-depthsexp=function(t1,t2,theta=1,lambda=1){
+depthsexp=function(t1,t2,theta=0,lambda=1){
   if(t1<theta){return(0)}
   return((1-psexp(t1,theta=theta,lambda=lambda))*depthexp(t2,lambda=lambda))
 }
 
 # origin-scale depth of of samples in rows of matrix samples w.r.t. shifted exponential with parameters theta and lambda
 
-depthsexp.sample=function(samples,theta=1,lambda=1){
+depthsexp.sample=function(samples,theta=0,lambda=1){
   depthsexp.sample=vector(length=nrow(samples))
   for(i in 1:nrow(samples)){
     depthsexp.sample[i]=depthsexp(t1=min(samples[i,]),t2=mean(samples[i,])-min(samples[i,]),theta,lambda)
