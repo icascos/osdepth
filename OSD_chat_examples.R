@@ -32,10 +32,12 @@ samples.current.new=matrix(rsexp(n=80,theta=theta.h+2,lambda=lambda.h+5),ncol=8)
 par(mfrow=c(2,2))
 
 osd.chart(samples.current)
-osd.chart(samples.current,type="sexp.05")
 osd.chart(samples.current,type="param",newdata=samples.current.new)
 set.seed(1)
 osd.chart(samples.current,type="boot",alpha=0.02,newdata=samples.current.new)
+set.seed(1)
+osd.chart(samples.current,type="EWMA",alpha=0.002,newdata=samples.current.new)
+
 
 
 require(qcc)
@@ -49,7 +51,8 @@ samples.dist.new=qcc.groups(m.new$dist,m.new$sample)
 
 par(mfrow=c(2,2))
 osd.chart(samples.dist.trial,newdata=samples.dist.new)
-osd.chart(samples.dist.trial,type="param",newdata=samples.dist.new)
 osd.chart(samples.dist.trial,type="param",newdata=samples.dist.new,theta=162,lambda=836)
 set.seed(1)
 osd.chart(samples.dist.trial,type="boot",alpha=0.002,newdata=samples.dist.new,B=10000)
+set.seed(1)
+osd.chart(samples.dist.trial,type="EWMA",alpha=0.002,newdata=samples.dist.new,theta=162,lambda=836)
