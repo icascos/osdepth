@@ -9,7 +9,7 @@
 source("https://raw.githubusercontent.com/icascos/osdepth/master/OSD.R")
 
 require(spc)
-osd.chart=function(trials,type="sexp.002",alpha=0.05,B=1000,Bew=10000,delta=0.25,newdata=NULL,theta=NULL,lambda=NULL){
+osd.chart=function(trials,type="sexp.002",alpha=0.05,B=min(10000,max(1000,20/alpha)),Bew=10000,delta=0.25,newdata=NULL,theta=NULL,lambda=NULL){
   if(alpha<=0|alpha>=1) alpha=0.05
   n=ncol(trials)
   Me=c(0.29675,0.48761,0.58949,0.65388,0.69842,0.73132,0.7568,0.77704,
