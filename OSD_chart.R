@@ -73,7 +73,7 @@ osd.chart=function(trials,type="sexp.002",alpha=0.05,B=min(10000,max(1000,20/alp
   else depth=osdepth(samples=rbind(trials,newdata),x=as.vector(trials))
   plot(depth,ylim=c(min(depth,CL),max(depth,CL)),type="l",xlab="sample",ylab="") 
   if(type=="boot") title("OSD chart nonparametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="OSD")
-  else if (type=="EWMA")  title(paste("OSD EWMA chart, delta=",delta),sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="EWMA")
+  else if (type=="EWMA")  title(paste("EWMA-OSD chart, delta=",delta),sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="EWMA")
   else if (type=="param")  title("OSD chart parametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="OSD")
   else title("OSD chart semiparametric",sub=paste("alpha=",alfa," CL=",round(CL*100000)/100000),ylab="OSD")
   if(type!="EWMA") {
