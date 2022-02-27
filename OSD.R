@@ -6,12 +6,12 @@ zdepth <- function(x, s, prob = rep(1/length(s), length(s)), ord = FALSE) {
   n <- length(s)
   if((x < s[1]) | (x > s[n])) {return(0)}
   me <- sum(s*prob)
-  if(x == sum(s*prob)) {return(1)}
+  if(x == me) {return(1)}
   if(x > me) {x <- -x ; s <- -s[n:1] ; prob <- prob[n:1]}
   i <- 1
   ac <- s[i]*prob[i]
   ap <- prob[i]
-  while(x*ap >= ac) {i <- i+1 ; ap <- ap+prob[i] ; ac <- ac+s[i]*prob[i]}
+  while(x*ap >= ac & i<n) {i <- i+1 ; ap <- ap+prob[i] ; ac <- ac+s[i]*prob[i]}
   return((ap*s[i]-ac)/(s[i]-x))
 }
 
